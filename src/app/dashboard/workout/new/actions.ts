@@ -3,7 +3,6 @@
 import { z } from 'zod'
 import { auth } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { createWorkoutForUser } from '@/data/workouts'
 
 const CreateWorkoutSchema = z.object({
@@ -24,5 +23,4 @@ export async function createWorkout(input: CreateWorkoutInput) {
 
   await createWorkoutForUser(userId, parsed.data)
   revalidatePath('/dashboard')
-  redirect('/dashboard')
 }

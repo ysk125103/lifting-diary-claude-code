@@ -56,8 +56,9 @@ export default function NewWorkoutForm() {
         startedAt: new Date(startedAt),
         finishedAt: new Date(computedFinishedAt),
       })
+      router.push('/dashboard')
     } catch (err) {
-      if (err instanceof Error && err.message !== 'NEXT_REDIRECT') {
+      if (err instanceof Error) {
         setError(err.message)
         setPending(false)
       }
