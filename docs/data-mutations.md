@@ -149,20 +149,33 @@ export async function deleteWorkout(workoutId: string) {
 }
 ```
 
-## After a Mutation: Revalidate or Redirect
+## After a Mutation: Revalidate, Then Let the Client Redirect
 
-After mutating data, always either revalidate the affected path or redirect:
+After mutating data, call `revalidatePath` to invalidate the cache. **Do not call `redirect()` inside a Server Action.** Navigation is the client's responsibility.
 
 ```ts
+// CORRECT — server action only mutates and revalidates
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 
-// Option A — stay on the page, refresh data
-revalidatePath('/dashboard')
-
-// Option B — send user elsewhere after the mutation
-revalidatePath('/workouts')
-redirect('/workouts')
+export async function createWorkout(input: CreateWorkoutInput) {
+  // ... auth, validate, insert ...
+  revalidatePath('/dashboard')
+}
 ```
 
-`redirect()` throws a control-flow exception — always call `revalidatePath` before it if needed. No code after `redirect()` will execute.
+```tsx
+// CORRECT — client component handles navigation after the action resolves
+await createWorkout(input)
+router.push('/dashboard')
+```
+
+```ts
+// WRONG — do not redirect inside a server action
+import { redirect } from 'next/navigation'
+
+export async function createWorkout(input: CreateWorkoutInput) {
+  // ...
+  revalidatePath('/dashboard')
+  redirect('/dashboard') // ← not allowed
+}
+```
