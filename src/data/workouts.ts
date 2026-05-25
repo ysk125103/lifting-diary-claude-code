@@ -3,6 +3,13 @@ import { workouts, workoutExercises, exercises, sets } from "@/db/schema";
 import { eq, and, gte, lt } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 
+export async function createWorkoutForUser(
+  userId: string,
+  data: { name: string; notes?: string; startedAt: Date; finishedAt: Date },
+) {
+  return db.insert(workouts).values({ ...data, userId });
+}
+
 export async function getWorkoutsForDate(date: string) {
   const { userId } = await auth();
   if (!userId) return [];

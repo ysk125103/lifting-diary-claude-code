@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/formatDate";
 import { getWorkoutsForDate } from "@/data/workouts";
@@ -26,7 +27,9 @@ export default async function DashboardPage({
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button>Log New Workout</Button>
+            <Button asChild>
+              <Link href="/dashboard/workout/new">Log New Workout</Link>
+            </Button>
             <DatePicker date={date} />
           </div>
         </div>
