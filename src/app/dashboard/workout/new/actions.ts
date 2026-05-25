@@ -14,13 +14,18 @@ const CreateWorkoutSchema = z.object({
 
 export type CreateWorkoutInput = z.infer<typeof CreateWorkoutSchema>
 
-export async function createWorkout(input: CreateWorkoutInput) {
+type ActionResult<T = void> =
+  | { success: true; data: T }
+  | { success: false; error: string }
+
+export async function createWorkout(input: CreateWorkoutInput): Promise<ActionResult> {
   const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
+  if (!userId) return { success: false, error: 'Unauthorized' }
 
   const parsed = CreateWorkoutSchema.safeParse(input)
-  if (!parsed.success) throw new Error('Invalid input')
+  if (!parsed.success) return { success: false, error: 'Invalid input' }
 
   await createWorkoutForUser(userId, parsed.data)
   revalidatePath('/dashboard')
+  return { success: true, data: undefined }
 }

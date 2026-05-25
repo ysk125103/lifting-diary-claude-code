@@ -49,19 +49,18 @@ export default function NewWorkoutForm() {
     const form = e.currentTarget
     const data = new FormData(form)
 
-    try {
-      await createWorkout({
-        name: data.get('name') as string,
-        notes: (data.get('notes') as string) || undefined,
-        startedAt: new Date(startedAt),
-        finishedAt: new Date(computedFinishedAt),
-      })
+    const result = await createWorkout({
+      name: data.get('name') as string,
+      notes: (data.get('notes') as string) || undefined,
+      startedAt: new Date(startedAt),
+      finishedAt: new Date(computedFinishedAt),
+    })
+
+    if (result.success) {
       router.push('/dashboard')
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message)
-        setPending(false)
-      }
+    } else {
+      setError(result.error)
+      setPending(false)
     }
   }
 
