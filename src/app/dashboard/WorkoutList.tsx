@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { getWorkoutsForDate } from "./actions";
-import { format } from "date-fns";
 import { Dumbbell } from "lucide-react";
+import { formatDate } from "@/lib/formatDate";
 
 type Set = {
   id: string;
@@ -59,7 +59,7 @@ export default function WorkoutList({ date }: { date: Date }) {
         <div>
           <p className="font-medium text-sm">No workouts logged</p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {format(date, "MMMM d, yyyy")} is empty
+            {formatDate(date)} is empty
           </p>
         </div>
       </div>

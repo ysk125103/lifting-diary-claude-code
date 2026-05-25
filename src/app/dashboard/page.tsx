@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { formatDate } from "@/lib/formatDate";
 import WorkoutList from "./WorkoutList";
 
 export default function DashboardPage() {
@@ -37,7 +38,7 @@ export default function DashboardPage() {
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
-                {date ? format(date, "MMM d, yyyy") : "Pick a date"}
+                {date ? formatDate(date) : "Pick a date"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0 shadow-lg" align="end">
@@ -57,7 +58,7 @@ export default function DashboardPage() {
 
         <section>
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-            {format(date, "EEEE, MMMM d, yyyy")}
+            {`${format(date, "EEEE")}, ${formatDate(date)}`}
           </h3>
           <WorkoutList date={date} />
         </section>
