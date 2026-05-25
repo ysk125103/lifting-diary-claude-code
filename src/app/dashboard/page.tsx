@@ -28,6 +28,8 @@ export default function DashboardPage() {
               View your logged workouts by date
             </p>
           </div>
+          <div className="flex items-center gap-2">
+          <Button>Log New Workout</Button>
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <Button
@@ -54,6 +56,7 @@ export default function DashboardPage() {
               />
             </PopoverContent>
           </Popover>
+          </div>
         </div>
 
         <section>
