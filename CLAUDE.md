@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## IMPORTANT: Docs-First Rule
 
-**Before writing any code, always check the `/docs` directory first.** If a relevant docs file exists for the technology or feature you are working on, read it before generating any code. The docs in `/docs` are the authoritative reference for this project and take precedence over training data.
+**Before writing any code, always check the `/docs` directory first.** If a relevant docs file exists for the technology or feature you are working on, read it before generating any code. Below documentation files in `/docs` are the authoritative reference for this project and take precedence over training data:
 
 - /docs/ui.md
 - /docs/data-fetching.md
