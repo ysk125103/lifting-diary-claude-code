@@ -1,5 +1,19 @@
 # Data Fetching
 
+## Architecture: Three-Tier Fetching Layer
+
+All data fetching follows a strict three-tier architecture. Each layer has a single responsibility and must not reach across layers:
+
+| Layer | Location | Responsibility |
+|---|---|---|
+| **UI / Server Component** | `src/app/**/page.tsx`, Server Components | Calls `auth()`, passes `userId` to data helpers, renders the result |
+| **Data helpers** | `src/data/*.ts` | All `db` queries via Drizzle ORM — no rendering, no auth logic |
+| **Database** | Neon (Postgres) | Stores data — never queried directly outside of `/data` helpers |
+
+**Rule:** Client Components never fetch data. Server Components never import `db` directly. Data helpers never call `auth()` — they receive `userId` as a parameter.
+
+---
+
 ## Rule: Server Components Only
 
 **ALL data fetching MUST be done via Server Components.** This is a hard rule with no exceptions.
@@ -14,7 +28,6 @@ Server Components fetch data directly by calling helper functions from the `/dat
 References:
 
 - Fetching Data: https://nextjs.org/docs/app/getting-started/fetching-data
-- Mutating Data: https://nextjs.org/docs/app/getting-started/mutating-data
 
 ## Rule: Database Queries via /data Helpers
 
