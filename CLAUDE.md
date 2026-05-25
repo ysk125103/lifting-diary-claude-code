@@ -8,6 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Before writing any code, always check the `/docs` directory first.** If a relevant docs file exists for the technology or feature you are working on, read it before generating any code. The docs in `/docs` are the authoritative reference for this project and take precedence over training data.
 
+- /docs/ui.md
+
 ## Commands
 
 ```bash
@@ -27,6 +29,7 @@ No test runner is configured yet.
 ## Architecture
 
 App Router structure under `src/app/`:
+
 - `layout.tsx` — root layout with Geist font variables and full-height flex body
 - `page.tsx` — home route
 - `globals.css` — global styles including Tailwind base
