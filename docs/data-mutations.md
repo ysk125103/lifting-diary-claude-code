@@ -149,6 +149,41 @@ export async function deleteWorkout(workoutId: string) {
 }
 ```
 
+## Rule: Return a Result Object, Never Throw
+
+Server Actions MUST return a typed result object indicating success or failure. **Do not throw errors** — the client checks the result and handles it accordingly.
+
+```ts
+type ActionResult<T = void> =
+  | { success: true; data: T }
+  | { success: false; error: string }
+
+export async function createWorkout(input: CreateWorkoutInput): Promise<ActionResult> {
+  const { userId } = await auth()
+  if (!userId) return { success: false, error: 'Unauthorized' }
+
+  const parsed = CreateWorkoutSchema.safeParse(input)
+  if (!parsed.success) return { success: false, error: 'Invalid input' }
+
+  await createWorkoutForUser(userId, parsed.data)
+  revalidatePath('/dashboard')
+  return { success: true, data: undefined }
+}
+```
+
+```tsx
+// Client Component checks result and handles each case
+const result = await createWorkout(input)
+
+if (result.success) {
+  router.push('/dashboard')
+} else {
+  setError(result.error)
+}
+```
+
+---
+
 ## After a Mutation: Revalidate, Then Let the Client Redirect
 
 After mutating data, call `revalidatePath` to invalidate the cache. **Do not call `redirect()` inside a Server Action.** Navigation is the client's responsibility.
