@@ -1,5 +1,3 @@
-"use server";
-
 import { db } from "@/db";
 import { workouts, workoutExercises, exercises, sets } from "@/db/schema";
 import { eq, and, gte, lt } from "drizzle-orm";
@@ -8,10 +6,6 @@ import { auth } from "@clerk/nextjs/server";
 export async function getWorkoutsForDate(date: string) {
   const { userId } = await auth();
   if (!userId) return [];
-
-  console.log(
-    `[dashboard] fetching workouts for date: ${date}, userId: ${userId}`,
-  );
 
   const [year, month, day] = date.split("-").map(Number);
   const start = new Date(year, month - 1, day, 0, 0, 0, 0);
@@ -37,7 +31,6 @@ export async function getWorkoutsForDate(date: string) {
     )
     .orderBy(workouts.finishedAt, workoutExercises.order, sets.setNumber);
 
-  // Group into workout → exercises → sets
   const workoutMap = new Map<
     string,
     {
@@ -101,10 +94,6 @@ export async function getWorkoutsForDate(date: string) {
       }
     }
   }
-
-  console.log(
-    `[dashboard] fetched ${workoutMap.size} workout(s) for date: ${date}`,
-  );
 
   return Array.from(workoutMap.values()).map((w) => ({
     ...w,

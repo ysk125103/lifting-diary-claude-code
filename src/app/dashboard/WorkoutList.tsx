@@ -1,7 +1,3 @@
-"use client";
-
-import { useEffect, useState, useTransition } from "react";
-import { getWorkoutsForDate } from "./actions";
 import { Dumbbell } from "lucide-react";
 import { formatDate } from "@/lib/formatDate";
 
@@ -29,27 +25,13 @@ type Workout = {
   exercises: Exercise[];
 };
 
-export default function WorkoutList({ date }: { date: Date }) {
-  const [workouts, setWorkouts] = useState<Workout[]>([]);
-  const [isPending, startTransition] = useTransition();
-
-  useEffect(() => {
-    startTransition(async () => {
-      const data = await getWorkoutsForDate(date.toISOString().split("T")[0]);
-      setWorkouts(data as Workout[]);
-    });
-  }, [date]);
-
-  if (isPending) {
-    return (
-      <div className="flex flex-col gap-3">
-        {[1, 2].map((i) => (
-          <div key={i} className="h-32 rounded-xl bg-muted animate-pulse" />
-        ))}
-      </div>
-    );
-  }
-
+export default function WorkoutList({
+  workouts,
+  date,
+}: {
+  workouts: Workout[];
+  date: string;
+}) {
   if (workouts.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-16 rounded-xl border border-dashed bg-background text-center">
@@ -59,7 +41,7 @@ export default function WorkoutList({ date }: { date: Date }) {
         <div>
           <p className="font-medium text-sm">No workouts logged</p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {formatDate(date)} is empty
+            {formatDate(new Date(date + "T00:00:00"))} is empty
           </p>
         </div>
       </div>
