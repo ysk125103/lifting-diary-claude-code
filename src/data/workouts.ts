@@ -10,6 +10,26 @@ export async function createWorkoutForUser(
   return db.insert(workouts).values({ ...data, userId });
 }
 
+export async function getWorkoutById(userId: string, workoutId: string) {
+  const rows = await db
+    .select()
+    .from(workouts)
+    .where(and(eq(workouts.id, workoutId), eq(workouts.userId, userId)))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+export async function updateWorkoutForUser(
+  userId: string,
+  workoutId: string,
+  data: { name: string; notes?: string; startedAt: Date; finishedAt: Date },
+) {
+  return db
+    .update(workouts)
+    .set(data)
+    .where(and(eq(workouts.id, workoutId), eq(workouts.userId, userId)));
+}
+
 export async function getWorkoutsForDate(date: string) {
   const { userId } = await auth();
   if (!userId) return [];

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Dumbbell } from "lucide-react";
 import { formatDate } from "@/lib/formatDate";
 
@@ -55,12 +56,15 @@ export default function WorkoutList({
           key={workout.id}
           className="rounded-xl border bg-background shadow-sm overflow-hidden"
         >
-          <div className="px-5 py-4 border-b bg-muted/40">
+          <Link
+            href={`/dashboard/workout/${workout.id}?date=${date}`}
+            className="block px-5 py-4 border-b bg-muted/40 hover:bg-muted/70 transition-colors"
+          >
             <h3 className="font-semibold">{workout.name ?? "Untitled Workout"}</h3>
             {workout.notes && (
               <p className="text-sm text-muted-foreground mt-0.5">{workout.notes}</p>
             )}
-          </div>
+          </Link>
 
           <div className="divide-y">
             {workout.exercises.map((ex) => (
