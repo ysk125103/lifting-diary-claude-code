@@ -38,4 +38,4 @@ App Router structure under `src/app/`:
 - `page.tsx` — home route
 - `globals.css` — global styles including Tailwind base
 
-All routing follows Next.js App Router conventions (file-based, nested layouts, Server Components by default).
+All routing should follow Next.js App Router conventions (file-based, nested layouts, Server Components by default).
