@@ -2,6 +2,8 @@ Building this app as part of the Claude Code Tutorial course - https://www.udemy
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+Vercel URL: https://lifting-diary-claude-code.vercel.app
+
 ## Getting Started
 
 First, run the development server:
