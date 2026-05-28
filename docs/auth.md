@@ -42,17 +42,21 @@ export function MyComponent() {
 
 ## Protecting Routes
 
-Route protection is handled via Clerk middleware (`src/middleware.ts`). Do not manually redirect unauthenticated users inside page components — configure protected routes in the middleware instead.
+Route protection is handled via Clerk middleware (`src/proxy.ts`). Do not manually redirect unauthenticated users inside page components — configure protected routes in the proxy instead.
 
 ```ts
-// src/middleware.ts
+// src/proxy.ts
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 const isProtectedRoute = createRouteMatcher(["/dashboard(.*)"]);
 
-export default clerkMiddleware((auth, req) => {
-  if (isProtectedRoute(req)) auth.protect();
-});
+export function proxy(req, event) {
+  return clerkMiddleware(async (auth, req) => {
+    if (isProtectedRoute(req)) {
+      await auth.protect();
+    }
+  })(req, event);
+}
 ```
 
 ## UI Components
@@ -79,5 +83,5 @@ import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 
 - **Never** trust a `userId` from URL params, query strings, or request bodies — always read it from `auth()` or `useAuth()`
 - **Never** store auth tokens manually; Clerk manages sessions
-- **Never** write middleware auth logic by hand; use `clerkMiddleware`
+- **Never** write proxy/middleware auth logic by hand; use `clerkMiddleware`
 - The `userId` from Clerk is the canonical user identifier throughout the app — use it as the foreign key in all database tables
