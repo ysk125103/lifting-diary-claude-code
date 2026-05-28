@@ -1,5 +1,7 @@
 # Routing
 
+> **Reference:** [Next.js proxy.ts API docs](https://nextjs.org/docs/app/api-reference/file-conventions/proxy)
+
 ## Route Structure
 
 All application routes must be nested under `/dashboard`. There should be no top-level user-facing routes outside of `/dashboard` and its sub-pages.
@@ -40,6 +42,7 @@ export const config = {
 ### Rules
 
 - Never use `redirect()` inside Server Actions for auth — Proxy handles it.
-- Never check session/auth state in page components to gate access — that is Proxy's job.
-- Public routes (sign-in, sign-up, marketing pages) must be explicitly excluded from the protected matcher, not the other way around.
+- Never check session/auth state in **page components** to gate access — that is Proxy's job.
+- **Always verify auth inside each Server Action/Server Function.** Server Functions are handled as POST requests to their parent route, so a Proxy matcher that excludes or changes that route can silently remove Proxy coverage. Do not rely on Proxy alone for Server Function auth.
+- Protected routes must be explicitly listed in `createRouteMatcher`. All other routes are implicitly public and do not need to be listed.
 - The file must export a named `proxy` function (not `middleware`) and live in `proxy.ts`.
