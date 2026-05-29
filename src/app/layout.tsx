@@ -8,6 +8,8 @@ import {
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Button } from "@/components/ui/button";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -33,28 +35,40 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        {/* Inline script prevents flash of wrong theme before hydration */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem('theme')||'system';if(t==='dark'||(t==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}`,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">
-        <ClerkProvider>
-          <header className="flex justify-between items-center p-4 gap-4 h-16">
-            <h1 className="font-bold text-3xl text-[#6c47ff]">Lifting Diary</h1>
-            <div className="flex items-center gap-4">
-              <Show when="signed-out">
-                <SignInButton>
-                  <Button variant="outline">Sign In</Button>
-                </SignInButton>
-                <SignUpButton>
-                  <Button>Sign Up</Button>
-                </SignUpButton>
-              </Show>
-              <Show when="signed-in">
-                <UserButton />
-              </Show>
-            </div>
-          </header>
-          {children}
-        </ClerkProvider>
+        <ThemeProvider>
+          <ClerkProvider>
+            <header className="flex justify-between items-center p-4 gap-4 h-16">
+              <h1 className="font-bold text-3xl text-[#6c47ff]">Lifting Diary</h1>
+              <div className="flex items-center gap-4">
+                <ThemeToggle />
+                <Show when="signed-out">
+                  <SignInButton>
+                    <Button variant="outline">Sign In</Button>
+                  </SignInButton>
+                  <SignUpButton>
+                    <Button>Sign Up</Button>
+                  </SignUpButton>
+                </Show>
+                <Show when="signed-in">
+                  <UserButton />
+                </Show>
+              </div>
+            </header>
+            {children}
+          </ClerkProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
