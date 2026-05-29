@@ -3,6 +3,30 @@ import { workouts, workoutExercises, exercises, sets } from "@/db/schema";
 import { eq, and, gte, lt } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 
+export type SetRow = {
+  id: string;
+  setNumber: number;
+  reps: number | null;
+  weight: string | null;
+  completed: boolean;
+};
+
+export type ExerciseRow = {
+  id: string;
+  name: string;
+  order: number;
+  sets: SetRow[];
+};
+
+export type WorkoutWithExercises = {
+  id: string;
+  name: string | null;
+  notes: string | null;
+  startedAt: Date | null;
+  finishedAt: Date | null;
+  exercises: ExerciseRow[];
+};
+
 export async function createWorkoutForUser(
   userId: string,
   data: { name: string; notes?: string; startedAt: Date; finishedAt: Date },
@@ -28,6 +52,63 @@ export async function updateWorkoutForUser(
     .update(workouts)
     .set(data)
     .where(and(eq(workouts.id, workoutId), eq(workouts.userId, userId)));
+}
+
+export async function getWorkoutWithExercises(
+  userId: string,
+  workoutId: string,
+): Promise<WorkoutWithExercises | null> {
+  const rows = await db
+    .select({
+      workout: workouts,
+      workoutExercise: workoutExercises,
+      exercise: exercises,
+      set: sets,
+    })
+    .from(workouts)
+    .leftJoin(workoutExercises, eq(workoutExercises.workoutId, workouts.id))
+    .leftJoin(exercises, eq(exercises.id, workoutExercises.exerciseId))
+    .leftJoin(sets, eq(sets.workoutExerciseId, workoutExercises.id))
+    .where(and(eq(workouts.id, workoutId), eq(workouts.userId, userId)))
+    .orderBy(workoutExercises.order, sets.setNumber);
+
+  if (rows.length === 0) return null;
+
+  const w = rows[0].workout;
+  const exerciseMap = new Map<string, ExerciseRow>();
+
+  for (const row of rows) {
+    if (row.workoutExercise && row.exercise) {
+      const we = row.workoutExercise;
+      if (!exerciseMap.has(we.id)) {
+        exerciseMap.set(we.id, {
+          id: we.id,
+          name: row.exercise.name,
+          order: we.order,
+          sets: [],
+        });
+      }
+      if (row.set) {
+        const s = row.set;
+        exerciseMap.get(we.id)!.sets.push({
+          id: s.id,
+          setNumber: s.setNumber,
+          reps: s.reps,
+          weight: s.weight,
+          completed: s.completed,
+        });
+      }
+    }
+  }
+
+  return {
+    id: w.id,
+    name: w.name,
+    notes: w.notes,
+    startedAt: w.startedAt,
+    finishedAt: w.finishedAt,
+    exercises: Array.from(exerciseMap.values()).sort((a, b) => a.order - b.order),
+  };
 }
 
 export async function getWorkoutsForDate(date: string) {
