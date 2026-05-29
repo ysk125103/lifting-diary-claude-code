@@ -39,3 +39,7 @@ App Router structure under `src/app/`:
 - `globals.css` — global styles including Tailwind base
 
 All routing should follow Next.js App Router conventions (file-based, nested layouts, Server Components by default).
+
+## Branch Creation
+
+When you create a new branch while working on an issue, give it a meaningful name. For example, instead of something like issue-8-20260529-0847, the branch name could be issue-8-theme-support.
