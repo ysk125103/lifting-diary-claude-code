@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation'
 import { auth } from '@clerk/nextjs/server'
-import { getWorkoutById } from '@/data/workouts'
+import { getWorkoutWithExercises } from '@/data/workouts'
 import EditWorkoutForm from './EditWorkoutForm'
+import ExerciseLogger from './ExerciseLogger'
 
 interface Props {
   params: Promise<{ workoutId: string }>
@@ -14,11 +15,11 @@ export default async function EditWorkoutPage({ params, searchParams }: Props) {
   const { userId } = await auth()
   if (!userId) return notFound()
 
-  const workout = await getWorkoutById(userId, workoutId)
+  const workout = await getWorkoutWithExercises(userId, workoutId)
   if (!workout) return notFound()
 
   return (
-    <div className="flex justify-center p-8">
+    <div className="flex flex-col items-center gap-8 p-8">
       <EditWorkoutForm
         workoutId={workout.id}
         defaultName={workout.name ?? ''}
@@ -27,6 +28,7 @@ export default async function EditWorkoutPage({ params, searchParams }: Props) {
         defaultFinishedAt={workout.finishedAt ?? new Date()}
         cancelHref={date ? `/dashboard?date=${date}` : '/dashboard'}
       />
+      <ExerciseLogger workoutId={workout.id} initialExercises={workout.exercises} />
     </div>
   )
 }
