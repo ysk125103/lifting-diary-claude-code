@@ -14,6 +14,7 @@ import {
   deleteSet as deleteSetHelper,
   searchExercises as searchExercisesHelper,
   createExercise as createExerciseHelper,
+  getTopExercises as getTopExercisesHelper,
 } from '@/data/exercises'
 
 const UpdateWorkoutSchema = z.object({
@@ -48,6 +49,12 @@ export async function searchExercises(query: string) {
   const { userId } = await auth()
   if (!userId) return []
   return searchExercisesHelper(query)
+}
+
+export async function getTopExercises() {
+  const { userId } = await auth()
+  if (!userId) return []
+  return getTopExercisesHelper()
 }
 
 export async function createAndAddExercise(

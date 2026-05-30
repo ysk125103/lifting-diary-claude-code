@@ -1,12 +1,20 @@
 import { db } from '@/db'
 import { exercises, workoutExercises, sets } from '@/db/schema'
-import { eq, ilike, sql } from 'drizzle-orm'
+import { eq, ilike, sql, asc } from 'drizzle-orm'
 
 export async function searchExercises(query: string) {
   return db
     .select()
     .from(exercises)
     .where(ilike(exercises.name, `%${query}%`))
+    .limit(10)
+}
+
+export async function getTopExercises() {
+  return db
+    .select()
+    .from(exercises)
+    .orderBy(asc(exercises.name))
     .limit(10)
 }
 

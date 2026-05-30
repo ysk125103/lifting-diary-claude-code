@@ -1,10 +1,25 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { addExercise, removeExercise, logSet, deleteSet, searchExercises, createAndAddExercise } from './actions'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command'
+import { addExercise, removeExercise, logSet, deleteSet, searchExercises, createAndAddExercise, getTopExercises } from './actions'
 import type { ExerciseRow, SetRow } from '@/data/workouts'
 import type { Exercise } from '@/db/schema'
 
@@ -15,37 +30,34 @@ interface Props {
 
 export default function ExerciseLogger({ workoutId, initialExercises }: Props) {
   const [exercises, setExercises] = useState<ExerciseRow[]>(initialExercises)
+  const [open, setOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<Exercise[]>([])
+  const [topExercises, setTopExercises] = useState<Exercise[]>([])
   const [searchPending, setSearchPending] = useState(false)
   const [addPending, setAddPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const searchRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    if (!open) return
+    getTopExercises().then(setTopExercises)
+  }, [open])
+
+  useEffect(() => {
+    if (searchQuery.length <= 3) {
+      setSearchResults([])
+      return
+    }
     const timer = setTimeout(async () => {
-      if (!searchQuery.trim()) {
-        setSearchResults([])
-        return
-      }
       setSearchPending(true)
       const results = await searchExercises(searchQuery)
       setSearchResults(results)
       setSearchPending(false)
-    }, searchQuery.trim() ? 300 : 0)
+    }, 300)
     return () => clearTimeout(timer)
   }, [searchQuery])
 
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
-        setSearchResults([])
-        setSearchQuery('')
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+  const displayedItems = searchQuery.length > 3 ? searchResults : topExercises
 
   async function handleAddExercise(exercise: Exercise) {
     setAddPending(true)
@@ -56,8 +68,8 @@ export default function ExerciseLogger({ workoutId, initialExercises }: Props) {
         ...prev,
         { id: result.data.workoutExerciseId, name: exercise.name, order: prev.length, sets: [] },
       ])
+      setOpen(false)
       setSearchQuery('')
-      setSearchResults([])
     } else {
       setError(result.error)
     }
@@ -73,8 +85,8 @@ export default function ExerciseLogger({ workoutId, initialExercises }: Props) {
         ...prev,
         { id: result.data.workoutExerciseId, name: result.data.name, order: prev.length, sets: [] },
       ])
+      setOpen(false)
       setSearchQuery('')
-      setSearchResults([])
     } else {
       setError(result.error)
     }
@@ -129,7 +141,7 @@ export default function ExerciseLogger({ workoutId, initialExercises }: Props) {
   }
 
   return (
-    <Card className="w-full max-w-lg overflow-visible">
+    <Card className="w-full max-w-lg">
       <CardHeader>
         <CardTitle>Exercises</CardTitle>
       </CardHeader>
@@ -150,40 +162,63 @@ export default function ExerciseLogger({ workoutId, initialExercises }: Props) {
           />
         ))}
 
-        <div ref={searchRef} className="relative flex flex-col gap-1">
-          <Input
-            placeholder="Search exercises to add…"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            disabled={addPending}
-          />
-          {searchPending && (
-            <p className="text-xs text-muted-foreground px-1">Searching…</p>
-          )}
-          {(searchResults.length > 0 || (!searchPending && searchQuery.trim())) && (
-            <div className="absolute top-full left-0 right-0 z-10 mt-1 rounded-md border bg-popover shadow-md">
-              {searchResults.map((ex) => (
-                <button
-                  key={ex.id}
-                  className="w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground"
-                  onClick={() => handleAddExercise(ex)}
-                  disabled={addPending}
-                >
-                  {ex.name}
-                </button>
-              ))}
-              {!searchPending && searchQuery.trim() && (
-                <button
-                  className="w-full px-3 py-2 text-left text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground border-t"
-                  onClick={() => handleCreateAndAdd(searchQuery.trim())}
-                  disabled={addPending}
-                >
-                  + Create &ldquo;{searchQuery.trim()}&rdquo;
-                </button>
-              )}
-            </div>
-          )}
-        </div>
+        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setSearchQuery('') }}>
+          <DialogTrigger asChild>
+            <Button variant="outline">+ Add Exercise</Button>
+          </DialogTrigger>
+          <DialogContent className="p-0 gap-0 max-w-md">
+            <DialogHeader className="px-4 pt-4 pb-2">
+              <DialogTitle>Add Exercise</DialogTitle>
+            </DialogHeader>
+            <Command shouldFilter={false}>
+              <CommandInput
+                placeholder="Search exercises…"
+                value={searchQuery}
+                onValueChange={setSearchQuery}
+              />
+              <CommandList>
+                {searchPending ? (
+                  <p className="px-4 py-3 text-sm text-muted-foreground">Searching…</p>
+                ) : (
+                  <>
+                    {displayedItems.length === 0 && searchQuery.length <= 3 && (
+                      <CommandEmpty>No exercises found.</CommandEmpty>
+                    )}
+                    {displayedItems.length === 0 && searchQuery.length > 3 && !searchPending && (
+                      <CommandEmpty>No results for &ldquo;{searchQuery}&rdquo;.</CommandEmpty>
+                    )}
+                    <CommandGroup
+                      heading={searchQuery.length > 3 ? 'Search results' : 'Top exercises'}
+                    >
+                      {displayedItems.map((ex) => (
+                        <CommandItem
+                          key={ex.id}
+                          value={ex.name}
+                          onSelect={() => handleAddExercise(ex)}
+                          disabled={addPending}
+                        >
+                          {ex.name}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                    {searchQuery.trim() && (
+                      <CommandGroup>
+                        <CommandItem
+                          value={`__create__${searchQuery}`}
+                          onSelect={() => handleCreateAndAdd(searchQuery.trim())}
+                          disabled={addPending}
+                          className="text-muted-foreground"
+                        >
+                          + Create &ldquo;{searchQuery.trim()}&rdquo;
+                        </CommandItem>
+                      </CommandGroup>
+                    )}
+                  </>
+                )}
+              </CommandList>
+            </Command>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   )
