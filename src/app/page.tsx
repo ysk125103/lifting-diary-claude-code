@@ -24,11 +24,13 @@ export default async function Home() {
           progress, and see exactly how far you&apos;ve come — one set at a time.
         </p>
         <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-          <SignUpButton>
-            <Button size="lg" className="bg-[#6c47ff] hover:bg-[#5535e0] text-white px-8 h-12 text-base">
-              Get Started Free
-            </Button>
-          </SignUpButton>
+          {process.env.NODE_ENV === "development" && (
+            <SignUpButton>
+              <Button size="lg" className="bg-[#6c47ff] hover:bg-[#5535e0] text-white px-8 h-12 text-base">
+                Get Started Free
+              </Button>
+            </SignUpButton>
+          )}
           <SignInButton>
             <Button size="lg" variant="outline" className="px-8 h-12 text-base">
               Sign In
@@ -130,11 +132,20 @@ export default async function Home() {
           <p className="text-zinc-500 dark:text-zinc-400 mb-8">
             Join lifters who are serious about their progress. It&apos;s free, forever.
           </p>
-          <SignUpButton>
-            <Button size="lg" className="bg-[#6c47ff] hover:bg-[#5535e0] text-white px-10 h-12 text-base">
-              Create Your Free Account
-            </Button>
-          </SignUpButton>
+          {process.env.NODE_ENV === "development" && (
+            <SignUpButton>
+              <Button size="lg" className="bg-[#6c47ff] hover:bg-[#5535e0] text-white px-10 h-12 text-base">
+                Create Your Free Account
+              </Button>
+            </SignUpButton>
+          )}
+          {process.env.NODE_ENV !== "development" && (
+            <SignInButton>
+              <Button size="lg" className="bg-[#6c47ff] hover:bg-[#5535e0] text-white px-10 h-12 text-base">
+                Sign In
+              </Button>
+            </SignInButton>
+          )}
         </div>
       </section>
 

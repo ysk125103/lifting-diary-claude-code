@@ -67,9 +67,11 @@ export default function RootLayout({
                   <SignInButton>
                     <Button variant="outline">Sign In</Button>
                   </SignInButton>
-                  <SignUpButton>
-                    <Button>Sign Up</Button>
-                  </SignUpButton>
+                  {process.env.NODE_ENV === "development" && (
+                    <SignUpButton>
+                      <Button>Sign Up</Button>
+                    </SignUpButton>
+                  )}
                 </Show>
                 <Show when="signed-in">
                   <UserButton />
