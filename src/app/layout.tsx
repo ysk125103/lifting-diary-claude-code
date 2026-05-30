@@ -7,6 +7,7 @@ import {
 } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -50,7 +51,16 @@ export default function RootLayout({
         <ThemeProvider>
           <ClerkProvider>
             <header className="flex justify-between items-center p-4 gap-4 h-16">
-              <h1 className="font-bold text-3xl text-[#6c47ff]">Lifting Diary</h1>
+              <Show when="signed-in">
+                <Link href="/dashboard">
+                  <h1 className="font-bold text-3xl text-[#6c47ff]">Lifting Diary</h1>
+                </Link>
+              </Show>
+              <Show when="signed-out">
+                <Link href="/">
+                  <h1 className="font-bold text-3xl text-[#6c47ff]">Lifting Diary</h1>
+                </Link>
+              </Show>
               <div className="flex items-center gap-4">
                 <ThemeToggle />
                 <Show when="signed-out">
