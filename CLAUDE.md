@@ -22,7 +22,12 @@ npm run build    # production build
 npm run lint     # run ESLint
 ```
 
-No test runner is configured yet.
+```bash
+npx playwright test        # run all E2E tests
+npx playwright test --ui   # open Playwright UI
+```
+
+E2E tests live in `e2e/`. Shared helpers (e.g. `signIn`) are in `e2e/helpers.ts`. Tests require `TEST_USER_EMAIL` and `TEST_USER_PASSWORD` env vars (set in `.env.test.local`).
 
 ## Stack
 
